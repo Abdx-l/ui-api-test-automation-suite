@@ -10,7 +10,8 @@ def test_validation(api):
  session,url=api;assert session.post(url+"/policies",json={"name":"","coverage":-1},timeout=5).status_code in (400,422)
 def test_pagination(api):
  session,url=api
- for i in range(3):create(api,f"page-{i}")
+ ids=[create(api,f"page-{i}") for i in range(3)]
+ assert all(id in [r["id"] for r in session.get(url+"/policies?page=0&size=100",timeout=5).json()] for id in ids)
  first=session.get(url+"/policies?page=0&size=1",timeout=5).json();second=session.get(url+"/policies?page=1&size=1",timeout=5).json();assert len(first)==len(second)==1;assert first[0]["id"]<second[0]["id"]
 def test_missing(api):
  session,url=api;assert session.get(url+"/policies/9999999",timeout=5).status_code==404
